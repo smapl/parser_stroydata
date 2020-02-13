@@ -3,7 +3,7 @@ import requests
 import csv
 
 
-link_spisok = []
+urls = []
 for i in range(51):
     url = f"https://stroydata.ru/msk.html?page={i}"
     response = requests.get(url)
@@ -12,13 +12,12 @@ for i in range(51):
     link_list = links.find_all("li")
     for li in link_list:
         link = li.find("a").get("href")
-
-        link_spisok.append(link)
+        urls.append(link)
 
 data = []
 print("pars data")
 count = 0
-for lk in link_spisok:
+for lk in urls:
     data_in_page = []
     url = f"https://stroydata.ru{lk}"
     response = requests.get(url)
@@ -27,20 +26,24 @@ for lk in link_spisok:
     info = soup.find("dl", {"class": "list-space-plus"})
     full = info.find_all("dd")
 
+    intermediate_list = []
     for each in full:
         full[full.index(each)] = each.text
-    data.append(full)
+
+    intermediate_list.append(full[-1])
+    intermediate_list.append(full[2])
+    intermediate_list.append(full[3])
+
+    data.append(intermediate_list)
     print(f"{count} : {url}")
     count += 1
 
-with open("pars.csv", "a") as fl:
+with open("StroyData.csv", "a") as fl:
     writer = csv.writer(fl)
-    head = [
-        "Полное наименование,Адрес,Телефон,E-mail,Сайт,Специализация,Услуги компании,Штат сотрудников,Директор".split()
-    ]
+    head = ["Директор,Телефон,E-mail".split(",")]
 
     for row in head:
-        writer.writerow(head)
+        writer.writerow(row)
 
     for row in data:
         writer.writerow(row)
